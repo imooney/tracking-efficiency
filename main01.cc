@@ -134,8 +134,8 @@ int main() {
     TH1D* effic_eta = new TH1D("e_eta", "eta", 120, -3, 3);
     TH1D* effic_leadPt = new TH1D("e_leadPt", "pt", 100, 0, 50);
     TH1D* effic_Pt = new TH1D("e_Pt", "pt", 100, 0, 40);
-    TH1D* test_ptdiff = new TH1D("e_ptdiff", "pt", 100, 0, 10);
-    TH1D* test_without_leadsublead = new TH1D("e_leadsublead", "pt", 100, 0, 10);
+    TH1D* test_ptdiff = new TH1D("e_ptdiff", "efficiency corrected pt - uncorrected pt", 100, -50, 50);
+    TH1D* test_without_leadsublead = new TH1D("e_leadsublead", "pt", 100, 0, 5);
     
     //charged (denoted c_) fraction only, with tracking efficiency selection applied on top of cuts - jet level                                                                                                                   
     TH1D* c_effic_px = new TH1D("c_e_px","px",101,-3,3);
@@ -166,7 +166,7 @@ int main() {
   
     // Begin event loop. Generate event. Skip if error. List first one.
     
-    for (int iEvent = 0; iEvent < 10000; ++iEvent) {
+    for (int iEvent = 0; iEvent < 100000; ++iEvent) {
       uncut_part.clear();
       cut_part.clear();
       cut2_part.clear();
@@ -214,6 +214,9 @@ int main() {
       //leading jet pt spectra (a) without cuts, (b) with particle cuts, (c) with jet cuts, and (d) with cuts + efficiency
       //(a):
       uncut_leadPt->Fill(uncut_jets[0].pt());
+      if (uncut_jets[0].user_index() != 0) {
+	c_uncut_leadPt->Fill(uncut_jets[0].pt());
+      }
       //(b):
       cut_leadPt->Fill(cut_part[0].pt());
       //(c):
@@ -226,6 +229,9 @@ int main() {
       //(d):
       if (abs(effic_jets[0].eta()) < (1 - R)) {
         effic_leadPt->Fill(effic_jets[0].pt());
+	if (effic_jets[0].user_index() != 0) {
+	  c_effic_leadPt->Fill(effic_jets[0].pt());
+	}
       }    
 
       //pseudojets without cuts
@@ -322,16 +328,39 @@ int main() {
 	    c_effic_Pt->Fill(effic_jets[i].pt());
 	  }
         }
-	if (i != 0 && i != 1) {
-	  test_without_leadsublead->Fill(effic_jets[i].pt());
-	}
+      }
+
+      for (int i = 0; i < effic_jets.size(); ++ i) {
+	if (abs(effic_jets[i].eta()) < (1 - R)) {
+	  if (i != 0 && i != 1) {
+	    test_without_leadsublead->Fill(effic_jets[i].pt());
+	  }
+ 	}
       }
       
       //testing!
+      double mindist = 99999;
+      double ptdiff = -99999;
+      for (int i = 0; i < cut2_jets.size(); ++ i) {
+	double dist = abs(effic_jets[0].eta() - cut2_jets[i].eta());
+	if (dist < mindist) {
+	  //cout << "new dist: " << dist << " replacing old dist: " << mindist << endl;
+	  mindist = dist;
+	  ptdiff = effic_jets[0].pt() - cut2_jets[i].eta();
+	  // cout << "new ptdiff: " << ptdiff << endl;
+	}
+      }
+      //cout << "final mindist: " << mindist << " and final ptdiff: " << ptdiff << endl;
+      if (mindist != 99999) {
+	//	cout << "checking that mindist != 99999: " << mindist << endl;
+	test_ptdiff->Fill(ptdiff);
+      }
+      //cout << "event ############: " << iEvent << endl;
+      /*
       if (abs(uncut_jets[0].eta() - effic_jets[0].eta()) < 0.0001) {
 	double ptdiff = uncut_jets[0].pt() - effic_jets[0].pt();
 	test_ptdiff->Fill(ptdiff);
-      }
+      }*/
       /*for (int i = 0; i < uncut_jets.size(); ++ i) {
 	if (uncut_jets[i].eta() == effic_jets[0].eta()) {
 	  test_ptdiff->Fill(uncut_jets[i].pt() - effic_jets[0].pt());
