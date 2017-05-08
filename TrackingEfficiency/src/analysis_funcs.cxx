@@ -152,19 +152,19 @@ namespace analysis {
     containers::containers() {
         //trees
         tuncut   = new TTree("uncut","uncut");
-        tcuncut  = new TTree("charged uncut","charged uncut");
+        tcuncut  = new TTree("chargedUncut","charged uncut");
         tcut     = new TTree("cut","cut");
-        tccut    = new TTree("charged cut","charged cut");
+        tccut    = new TTree("chargedCut","charged cut");
         tcut2    = new TTree("cut2","cut2");
-        tccut2   = new TTree("charged cut2","charged cut2");
+        tccut2   = new TTree("chargedCut2","charged cut2");
         teffic   = new TTree("efficiency","efficiency");
-        tceffic  = new TTree("charged efficiency","charged efficiency");
-        tlead    = new TTree("leading jet pTs","leading jet pTs");
-        tdiffs   = new TTree("number and pT differences","number and pT differences");
+        tceffic  = new TTree("chargedEfficiency","charged efficiency");
+        tlead    = new TTree("leadingJetpTs","leading jet pTs");
+        tdiffs   = new TTree("numberAndpTDifferences","number and pT differences");
         ttests   = new TTree("tests","tests");
             
-        tuncutcons    = new TTree("uncut constituents","uncut constituents");
-        tcuncutcons   = new TTree("charged uncut constituents","charged uncut constituents");
+        tuncutcons    = new TTree("uncutConstituents","uncut constituents");
+        tcuncutcons   = new TTree("chargedUncutConstituents","charged uncut constituents");
         
         //book space for the vectors of particles
         uncut_part.reserve(50); c_uncut_part.reserve(50);   cut_part.reserve(50);

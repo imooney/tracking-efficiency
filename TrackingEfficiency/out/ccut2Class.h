@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat May  6 15:24:44 2017 by ROOT version 5.34/36
-// from TTree uncut/uncut
+// Sat May  6 18:02:43 2017 by ROOT version 5.34/36
+// from TTree chargedCut2/charged cut2
 // found on file: trackeffic.root
 //////////////////////////////////////////////////////////
 
-#ifndef uncutClass_h
-#define uncutClass_h
+#ifndef ccut2Class_h
+#define ccut2Class_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -16,31 +16,31 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class uncutClass {
+class ccut2Class {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
-   Double_t        uncut_px;
-   Double_t        uncut_py;
-   Double_t        uncut_pz;
-   Double_t        uncut_E;
-   Double_t        uncut_phi;
-   Double_t        uncut_eta;
-   Double_t        uncut_Pt;
+   Double_t        c_cut2_px;
+   Double_t        c_cut2_py;
+   Double_t        c_cut2_pz;
+   Double_t        c_cut2_E;
+   Double_t        c_cut2_phi;
+   Double_t        c_cut2_eta;
+   Double_t        c_cut2_Pt;
 
    // List of branches
-   TBranch        *b_uncut_px;   //!
-   TBranch        *b_uncut_py;   //!
-   TBranch        *b_uncut_pz;   //!
-   TBranch        *b_uncut_E;   //!
-   TBranch        *b_uncut_phi;   //!
-   TBranch        *b_uncut_eta;   //!
-   TBranch        *b_uncut_Pt;   //!
+   TBranch        *b_c_cut2_px;   //!
+   TBranch        *b_c_cut2_py;   //!
+   TBranch        *b_c_cut2_pz;   //!
+   TBranch        *b_c_cut2_E;   //!
+   TBranch        *b_c_cut2_phi;   //!
+   TBranch        *b_c_cut2_eta;   //!
+   TBranch        *b_c_cut2_Pt;   //!
 
-   uncutClass(TTree *tree=0);
-   virtual ~uncutClass();
+   ccut2Class(TTree *tree=0);
+   virtual ~ccut2Class();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -52,8 +52,8 @@ public :
 
 #endif
 
-#ifdef uncutClass_cxx
-uncutClass::uncutClass(TTree *tree) : fChain(0) 
+#ifdef ccut2Class_cxx
+ccut2Class::ccut2Class(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -62,25 +62,25 @@ uncutClass::uncutClass(TTree *tree) : fChain(0)
       if (!f || !f->IsOpen()) {
          f = new TFile("trackeffic.root");
       }
-      f->GetObject("uncut",tree);
+      f->GetObject("chargedCut2",tree);
 
    }
    Init(tree);
 }
 
-uncutClass::~uncutClass()
+ccut2Class::~ccut2Class()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t uncutClass::GetEntry(Long64_t entry)
+Int_t ccut2Class::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t uncutClass::LoadTree(Long64_t entry)
+Long64_t ccut2Class::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -93,7 +93,7 @@ Long64_t uncutClass::LoadTree(Long64_t entry)
    return centry;
 }
 
-void uncutClass::Init(TTree *tree)
+void ccut2Class::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -109,17 +109,17 @@ void uncutClass::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("uncut_px", &uncut_px, &b_uncut_px);
-   fChain->SetBranchAddress("uncut_py", &uncut_py, &b_uncut_py);
-   fChain->SetBranchAddress("uncut_pz", &uncut_pz, &b_uncut_pz);
-   fChain->SetBranchAddress("uncut_E", &uncut_E, &b_uncut_E);
-   fChain->SetBranchAddress("uncut_phi", &uncut_phi, &b_uncut_phi);
-   fChain->SetBranchAddress("uncut_eta", &uncut_eta, &b_uncut_eta);
-   fChain->SetBranchAddress("uncut_Pt", &uncut_Pt, &b_uncut_Pt);
+   fChain->SetBranchAddress("c_cut2_px", &c_cut2_px, &b_c_cut2_px);
+   fChain->SetBranchAddress("c_cut2_py", &c_cut2_py, &b_c_cut2_py);
+   fChain->SetBranchAddress("c_cut2_pz", &c_cut2_pz, &b_c_cut2_pz);
+   fChain->SetBranchAddress("c_cut2_E", &c_cut2_E, &b_c_cut2_E);
+   fChain->SetBranchAddress("c_cut2_phi", &c_cut2_phi, &b_c_cut2_phi);
+   fChain->SetBranchAddress("c_cut2_eta", &c_cut2_eta, &b_c_cut2_eta);
+   fChain->SetBranchAddress("c_cut2_Pt", &c_cut2_Pt, &b_c_cut2_Pt);
    Notify();
 }
 
-Bool_t uncutClass::Notify()
+Bool_t ccut2Class::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -130,18 +130,18 @@ Bool_t uncutClass::Notify()
    return kTRUE;
 }
 
-void uncutClass::Show(Long64_t entry)
+void ccut2Class::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t uncutClass::Cut(Long64_t entry)
+Int_t ccut2Class::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef uncutClass_cxx
+#endif // #ifdef ccut2Class_cxx

@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat May  6 15:24:44 2017 by ROOT version 5.34/36
-// from TTree uncut/uncut
+// Sat May  6 14:57:24 2017 by ROOT version 5.34/36
+// from TTree tests/tests
 // found on file: trackeffic.root
 //////////////////////////////////////////////////////////
 
-#ifndef uncutClass_h
-#define uncutClass_h
+#ifndef testsClass_h
+#define testsClass_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -16,31 +16,19 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class uncutClass {
+class testsClass {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
-   Double_t        uncut_px;
-   Double_t        uncut_py;
-   Double_t        uncut_pz;
-   Double_t        uncut_E;
-   Double_t        uncut_phi;
-   Double_t        uncut_eta;
-   Double_t        uncut_Pt;
+   Double_t        without_leadsublead;
 
    // List of branches
-   TBranch        *b_uncut_px;   //!
-   TBranch        *b_uncut_py;   //!
-   TBranch        *b_uncut_pz;   //!
-   TBranch        *b_uncut_E;   //!
-   TBranch        *b_uncut_phi;   //!
-   TBranch        *b_uncut_eta;   //!
-   TBranch        *b_uncut_Pt;   //!
+   TBranch        *b_without_leadsublead;   //!
 
-   uncutClass(TTree *tree=0);
-   virtual ~uncutClass();
+   testsClass(TTree *tree=0);
+   virtual ~testsClass();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -52,8 +40,8 @@ public :
 
 #endif
 
-#ifdef uncutClass_cxx
-uncutClass::uncutClass(TTree *tree) : fChain(0) 
+#ifdef testsClass_cxx
+testsClass::testsClass(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -62,25 +50,25 @@ uncutClass::uncutClass(TTree *tree) : fChain(0)
       if (!f || !f->IsOpen()) {
          f = new TFile("trackeffic.root");
       }
-      f->GetObject("uncut",tree);
+      f->GetObject("tests",tree);
 
    }
    Init(tree);
 }
 
-uncutClass::~uncutClass()
+testsClass::~testsClass()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t uncutClass::GetEntry(Long64_t entry)
+Int_t testsClass::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t uncutClass::LoadTree(Long64_t entry)
+Long64_t testsClass::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -93,7 +81,7 @@ Long64_t uncutClass::LoadTree(Long64_t entry)
    return centry;
 }
 
-void uncutClass::Init(TTree *tree)
+void testsClass::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -109,17 +97,11 @@ void uncutClass::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("uncut_px", &uncut_px, &b_uncut_px);
-   fChain->SetBranchAddress("uncut_py", &uncut_py, &b_uncut_py);
-   fChain->SetBranchAddress("uncut_pz", &uncut_pz, &b_uncut_pz);
-   fChain->SetBranchAddress("uncut_E", &uncut_E, &b_uncut_E);
-   fChain->SetBranchAddress("uncut_phi", &uncut_phi, &b_uncut_phi);
-   fChain->SetBranchAddress("uncut_eta", &uncut_eta, &b_uncut_eta);
-   fChain->SetBranchAddress("uncut_Pt", &uncut_Pt, &b_uncut_Pt);
+   fChain->SetBranchAddress("without_leadsublead", &without_leadsublead, &b_without_leadsublead);
    Notify();
 }
 
-Bool_t uncutClass::Notify()
+Bool_t testsClass::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -130,18 +112,18 @@ Bool_t uncutClass::Notify()
    return kTRUE;
 }
 
-void uncutClass::Show(Long64_t entry)
+void testsClass::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t uncutClass::Cut(Long64_t entry)
+Int_t testsClass::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef uncutClass_cxx
+#endif // #ifdef testsClass_cxx
