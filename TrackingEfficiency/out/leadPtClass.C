@@ -101,4 +101,7 @@ void leadPtClass::Loop()
     cefficleadPt->Scale(1/(double) nEntries); c1->SetLogy(); cefficleadPt->DrawCopy(); c1->SaveAs((path + "c_effic_" + type + ".pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
     
+    delete c1; c1 = NULL;
+
+    
 }

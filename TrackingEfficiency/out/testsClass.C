@@ -58,4 +58,7 @@ void testsClass::Loop()
     withoutleadsublead->Scale(1/(double) nEntries); c1->SetLogy(); withoutleadsublead->DrawCopy(); c1->SaveAs((path + "withoutleadsublead.pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
 
+    
+    delete c1; c1 = NULL;
+
 }

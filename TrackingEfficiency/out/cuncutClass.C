@@ -131,4 +131,7 @@ void cuncutClass::Loop()
     cuncut_etaphipt_z->GetXaxis()->SetTitle("p_{T}");
     cuncut_etaphipt_z->Scale(1/(double) nEntries); c1->SetLogy(); cuncut_etaphipt_z->DrawCopy(); c1->SaveAs((path + type + "pt.pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    
+    delete c1; c1 = NULL;
+
 }

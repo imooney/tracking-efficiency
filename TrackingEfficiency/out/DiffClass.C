@@ -82,4 +82,7 @@ void DiffClass::Loop()
     cnumdiff->Scale(1/(double) nEntries); c1->SetLogy(); cnumdiff->DrawCopy(); c1->SaveAs((path + "c_" + type + ".pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
     
+    delete c1; c1 = NULL;
+
+    
 }
