@@ -247,12 +247,10 @@ int main() {
                 test->tccut2->Fill();
             }
         }
-        
-        unsigned count_effic = 0, count_c_effic = 0;
+
         //pseudojets with cuts + charged particle tracking efficiency selection
         for (unsigned i = 0; i < effic_jets.size(); ++ i) {
             if (jet_cuts(effic_jets[i])) {
-                ++ count_effic;
                 test->effic_px    = effic_jets[i].px();
                 test->effic_py    = effic_jets[i].py();
                 test->effic_pz    = effic_jets[i].pz();
@@ -265,12 +263,8 @@ int main() {
             }
         }
         
-        test->num_diff_raw    = uncut_jets.size() - count_effic;
-        test->num_diff        = effic_jets.size() - count_effic;
-        
         for (unsigned i = 0; i < c_effic_jets.size(); ++ i) {
             if (jet_cuts(c_effic_jets[i])) {
-                ++ count_c_effic;
                 test->c_effic_px  = c_effic_jets[i].px();
                 test->c_effic_py  = c_effic_jets[i].py();
                 test->c_effic_pz  = c_effic_jets[i].pz();
@@ -282,15 +276,15 @@ int main() {
                 test->tceffic->Fill();
             }
         }
-        test->c_num_diff_raw  = c_uncut_jets.size() - count_c_effic;
-        test->c_num_diff      = c_effic_jets.size() - count_c_effic;
-        
+
         //Checking that pt spectrum without 2 highest-pt jets looks right
         analysis::without_lead2_jets(effic_jets, test->without_leadsublead, test->ttests);
         
         //Checks pt difference between leading jet with efficiency correction and
         //geometrically closest jet without efficiency correction.
-        analysis::geometric_pt_diff(effic_jets, cut2_jets, test->ptdiff);
+        analysis::geometric_pt_diff(effic_jets, cut2_jets, test->ptdiff, test->num_diff);
+        analysis::geometric_pt_diff(c_effic_jets, c_cut2_jets, test->c_ptdiff, test->c_num_diff);
+
         test->tdiffs->Fill();
         
     // End of event loop

@@ -34,7 +34,7 @@ namespace analysis {
     
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PARAMETERS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-        const int NumEvents     = 10000;
+        const int NumEvents     = 100000;
     //CUTS:
         //Particle level:
         const double eta_cut    = 1.0;
@@ -64,7 +64,7 @@ namespace analysis {
     //a test to see that pT spectrum is steeply falling if 1st and 2nd leading jets are removed
     void without_lead2_jets(const std::vector<fastjet::PseudoJet> effic_jets, double & without_leadsublead, TTree* ttests);
     //examines the pT difference between efficiency-corrected, and non-efficiency-corrected 'leading' jets
-    void geometric_pt_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff);
+    void geometric_pt_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff, int & num_diff);
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONTAINER CLASS~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     
@@ -85,9 +85,10 @@ namespace analysis {
         double cut2_px, cut2_py, cut2_pz, cut2_E, cut2_phi, cut2_eta, cut2_leadPt, cut2_Pt;
         double c_cut2_px, c_cut2_py, c_cut2_pz, c_cut2_E, c_cut2_phi, c_cut2_eta, c_cut2_leadPt, c_cut2_Pt;
         double effic_px, effic_py, effic_pz, effic_E, effic_phi, effic_eta, effic_leadPt, effic_Pt;
-        double ptdiff, without_leadsublead;
+        double without_leadsublead;
         double c_effic_px, c_effic_py, c_effic_pz, c_effic_E, c_effic_phi, c_effic_eta, c_effic_leadPt, c_effic_Pt;
-        double num_diff_raw, c_num_diff_raw, num_diff, c_num_diff;
+        double ptdiff, c_ptdiff;
+        int num_diff, c_num_diff;
         
         //particles
         std::vector<fastjet::PseudoJet> uncut_part, c_uncut_part, cut_part, cut2_part, c_cut_part, c_cut2_part, effic_part, c_effic_part;

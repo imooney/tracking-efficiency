@@ -24,8 +24,8 @@ namespace analysis {
         
         pythia.readString("Beams:eCM            = 200.");
         pythia.readString("HardQCD:all          = on");
-        pythia.readString("PhaseSpace:pTHatMin  = 20.");
-        pythia.readString("PhaseSpace:pTHatMax  = 30.");
+        pythia.readString("PhaseSpace:pTHatMin  = 25.");
+        pythia.readString("PhaseSpace:pTHatMax  = 35.");
         
         //turn off decays
         pythia.readString("111:mayDecay     = off");    //pi0
@@ -129,20 +129,26 @@ namespace analysis {
     
     //Pt difference between leading jet after efficiency correction and geometrically
     //closest (eta-phi) jet before correction
-    void geometric_pt_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff) {
+    void geometric_pt_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff, int & num_diff) {
         double mindist  =   99999;
-        double pt_diff   =  -99999;
+        double pt_diff  =  -99999;
+        int numdiff     =  -99999;
         if (effic_jets.size() != 0 ) {
             for (unsigned i = 0; i < cut2_jets.size(); ++ i) {
                 double dist = effic_jets[0].delta_R(cut2_jets[i]);
                 if (dist < mindist) {
                     mindist = dist;
                     pt_diff = effic_jets[0].pt() - cut2_jets[i].pt();
+                    //std::cout << effic_jets[0].constituents().size() << " " << cut2_jets[i].constituents().size() << std::endl;
+                    numdiff = cut2_jets[i].constituents().size() - effic_jets[0].constituents().size();
+                    //std::cout << numdiff << " " << effic_jets[0].constituents().size() - cut2_jets[i].constituents().size() << std::endl;
                 }
             }
         }
         if (mindist != 99999) {
             ptdiff = pt_diff;
+            //std::cout << "FINAL: " <<  numdiff << std::endl;
+            num_diff = numdiff;
         }
     }
     
@@ -233,9 +239,8 @@ namespace analysis {
         tceffic->Branch("c_effic_phi", &c_effic_phi);               tceffic->Branch("c_effic_eta", &c_effic_eta);
         tceffic->Branch("c_effic_Pt", &c_effic_Pt);
             
-        tdiffs->Branch("num_diff_raw", &num_diff_raw);              tdiffs->Branch("c_num_diff_raw", &c_num_diff_raw);
         tdiffs->Branch("num_diff", &num_diff);                      tdiffs->Branch("c_num_diff", &c_num_diff);
-        tdiffs->Branch("ptdiff", &ptdiff);
+        tdiffs->Branch("ptdiff", &ptdiff);                          tdiffs->Branch("c_ptdiff", &c_ptdiff);
             
         tlead->Branch("uncut_leadPt", &uncut_leadPt);               tlead->Branch("c_uncut_leadPt", &c_uncut_leadPt);
         tlead->Branch("cut_leadPt", &cut_leadPt);                   tlead->Branch("c_cut_leadPt", &c_cut_leadPt);
