@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat May  6 14:57:11 2017 by ROOT version 5.34/36
+// Tue May  9 22:14:29 2017 by ROOT version 5.34/36
 // from TTree numberAndpTDifferences/number and pT differences
 // found on file: trackeffic.root
 //////////////////////////////////////////////////////////
@@ -22,18 +22,20 @@ public :
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
-   Double_t        num_diff_raw;
-   Double_t        c_num_diff_raw;
-   Double_t        num_diff;
-   Double_t        c_num_diff;
+   //Int_t           num_diff_raw;
+   //Int_t           c_num_diff_raw;
+   Int_t           num_diff;
+   Int_t           c_num_diff;
    Double_t        ptdiff;
+   Double_t        c_ptdiff;
 
    // List of branches
-   TBranch        *b_num_diff_raw;   //!
-   TBranch        *b_c_num_diff_raw;   //!
+   //TBranch        *b_num_diff_raw;   //!
+   //TBranch        *b_c_num_diff_raw;   //!
    TBranch        *b_num_diff;   //!
    TBranch        *b_c_num_diff;   //!
    TBranch        *b_ptdiff;   //!
+   TBranch        *b_c_ptdiff;   //!
 
    DiffClass(TTree *tree=0);
    virtual ~DiffClass();
@@ -49,7 +51,7 @@ public :
 #endif
 
 #ifdef DiffClass_cxx
-DiffClass::DiffClass(TTree *tree) : fChain(0) 
+DiffClass::DiffClass(TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -105,11 +107,12 @@ void DiffClass::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("num_diff_raw", &num_diff_raw, &b_num_diff_raw);
-   fChain->SetBranchAddress("c_num_diff_raw", &c_num_diff_raw, &b_c_num_diff_raw);
+   //fChain->SetBranchAddress("num_diff_raw", &num_diff_raw, &b_num_diff_raw);
+   //fChain->SetBranchAddress("c_num_diff_raw", &c_num_diff_raw, &b_c_num_diff_raw);
    fChain->SetBranchAddress("num_diff", &num_diff, &b_num_diff);
    fChain->SetBranchAddress("c_num_diff", &c_num_diff, &b_c_num_diff);
    fChain->SetBranchAddress("ptdiff", &ptdiff, &b_ptdiff);
+   fChain->SetBranchAddress("c_ptdiff", &c_ptdiff, &b_c_ptdiff);
    Notify();
 }
 
