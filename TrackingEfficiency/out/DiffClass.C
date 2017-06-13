@@ -7,8 +7,8 @@
 void DiffClass::Loop()
 {
 //   In a ROOT session, you can do:
-//      Root > .L DiffClass.C.C
-//      Root > DiffClass.C t
+//      Root > .L DiffClass.C
+//      Root > DiffClass t
 //      Root > t.GetEntry(12); // Fill t data members with entry number 12
 //      Root > t.Show();       // Show values of entry 12
 //      Root > t.Show(16);     // Read and show values of entry 16
@@ -40,9 +40,18 @@ void DiffClass::Loop()
     
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
     
-    TH1 * numdiff = new TH1D((type).c_str(), "Number difference before - after efficiency", 100, 0, 8);
-    TH1 * cnumdiff = new TH1D(("c_" + type).c_str(), "Number difference before - after efficiency (charged)", 100, 0, 8);
-    TH1 * pt_diff = new TH1D("ptdiff", "p_{T} difference between lead jet before/after effiency", 100, -21, 13);
+    gStyle->SetOptStat(0);
+    
+    TH1 * numdiff   = new TH1D((type).c_str(), "Number difference before - after efficiency", 100, 0, 8);
+    TH1 * cnumdiff  = new TH1D(("c_" + type).c_str(), "Number difference before - after efficiency (charged)", 100, 0, 8);
+    TH1 * reldiff   = new TH1D("rel_diff", "ratio of track difference to number of tracks",100, -0.1, 1.1);
+    TH1 * creldiff  = new TH1D("crel_diff", "ratio of track difference to number of tracks (charged)",100, -0.1, 1.1);
+    
+    TH2 * reldiff2D = new TH2D("reldiff2D","relative difference v. number of tracks",100,-0.1,1.1,100,0,25);
+    TH2 * creldiff2D= new TH2D("creldiff2D","relative difference v. number of tracks (charged)",100,-0.1,1.1,100,0,25);
+    
+    TH3 * cdifftotpt = new TH3D("cdifftotpt", "num diff, total num, pt diff (charged)",100, -5, 10, 100, 0, 25, 100, -20, 5);
+    TH3 * difftotpt = new TH3D("difftotpt", "num diff, total num, pt diff", 100, -5, 10, 100, 0, 25, 100, -20, 5);
     
     Long64_t nentries = fChain->GetEntriesFast();
     
@@ -53,39 +62,147 @@ void DiffClass::Loop()
         nb = fChain->GetEntry(jentry);   nbytes += nb;
         numdiff->Fill(num_diff);
         cnumdiff->Fill(c_num_diff);
-        pt_diff->Fill(ptdiff);
+        reldiff->Fill(rel_diff);
+        creldiff->Fill(c_rel_diff);
+        reldiff2D->Fill(rel_diff, num_before);
+        creldiff2D->Fill(c_rel_diff, c_num_before);
+        cdifftotpt->Fill(c_num_diff, c_num_before, c_ptdiff);
+        difftotpt->Fill(num_diff, num_before, ptdiff);
     }
-    Int_t nEntries = pt_diff->GetEntries();
+    TH1D * reldiffprofX = reldiff2D->ProfileX("reldiffprofX", 0, 5);
+    TH1D * creldiffprofX = creldiff2D->ProfileX("creldiffprofX", 0, 5);
     
-    pt_diff->GetXaxis()->SetTitle("p_{T} [GeV/c]");
-    pt_diff->Scale(1/(double) nEntries); c1->SetLogy(); pt_diff->DrawCopy(); c1->SaveAs((path + "ptdiff.pdf").c_str());
+    TH1D * reldiffX = reldiff2D->ProjectionX("reldiffX", 8, 16);
+    TH1D * creldiffX = creldiff2D->ProjectionX("creldiffX", 8, 16);
+    
+
+    
+    
+    Int_t nEntries = numdiff->GetEntries();
+    
+    const char *xaxis = "Number difference";
+    const char *yaxis = "Total number";
+    const char *zaxis = "p_{T} difference [GeV/c]";
+    
+    c1->SetLogz();
+    
+    reldiff2D->GetXaxis()->SetTitle("Relative difference"); reldiff2D->GetYaxis()->SetTitle("Total Number");
+    reldiff2D->DrawCopy("colz"); c1->SaveAs((path + "reldiff2D.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    creldiff2D->GetXaxis()->SetTitle("Relative difference"); creldiff2D->GetYaxis()->SetTitle("Total Number");
+    creldiff2D->DrawCopy("colz"); c1->SaveAs((path + "c_reldiff2D.pdf").c_str()); gPad->Modified(); gPad->Update(); c1->SetLogz(0);
+    
+    
+    
+    reldiffprofX->GetXaxis()->SetTitle("Total Number"); reldiffprofX->GetYaxis()->SetTitle("Relative difference");
+    reldiffprofX->DrawCopy(); c1->SaveAs((path + "reldiffprofileX.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    creldiffprofX->GetXaxis()->SetTitle("Total Number"); creldiffprofX->GetYaxis()->SetTitle("Relative difference");
+    creldiffprofX->DrawCopy(); c1->SaveAs((path + "c_reldiffprofileX.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    c1->SetLogy();
+    
+    reldiffX->GetXaxis()->SetTitle("Relative difference");
+    reldiffX->DrawCopy(); c1->SaveAs((path + "reldiffX.pdf").c_str()); gPad->Modified(); gPad->Update();
+    creldiffX->GetXaxis()->SetTitle("Relative difference");
+    creldiffX->DrawCopy(); c1->SaveAs((path + "c_reldiffX.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    //c1->SetLogy();
+    
+    reldiff->GetXaxis()->SetTitle("Number difference/Total number");
+    reldiff->DrawCopy(); c1->SaveAs((path + "reldiff.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    creldiff->GetXaxis()->SetTitle("Number difference/Total number");
+    creldiff->DrawCopy(); c1->SaveAs((path + "creldiff.pdf").c_str()); gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    
+    //charged
+    
+    cdifftotpt->Project3D("yx"); //first vertical, second horizontal
+    cdifftotpt_yx->GetXaxis()->SetTitle(xaxis); cdifftotpt_yx->GetYaxis()->SetTitle(yaxis);
+    c1->SetLogz(); cdifftotpt_yx->DrawCopy("colz"); c1->SaveAs((path + "cdifftotpt_yx.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    cdifftotpt->Project3D("zy");
+    cdifftotpt_zy->GetXaxis()->SetTitle(yaxis); cdifftotpt_zy->GetYaxis()->SetTitle(zaxis);
+    cdifftotpt_zy->DrawCopy("colz"); c1->SaveAs((path + "cdifftotpt_zy.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    cdifftotpt->Project3D("zx");
+    cdifftotpt_zx->GetXaxis()->SetTitle(xaxis); cdifftotpt_zx->GetYaxis()->SetTitle(zaxis);
+    cdifftotpt_zx->DrawCopy("colz"); c1->SaveAs((path + "cdifftotpt_zx.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    
+    cdifftotpt->Project3D("x");
+    cdifftotpt_x->GetXaxis()->SetTitle(xaxis);
+    cdifftotpt_x->Scale(1/(double) nEntries); c1->SetLogy(); cdifftotpt_x->DrawCopy(); c1->SaveAs((path + "cdifftotpt_x.pdf").c_str());
+    gPad->Modified(); gPad->Update();
+    
+    cdifftotpt->Project3D("y");
+    cdifftotpt_y->GetXaxis()->SetTitle(yaxis);
+    cdifftotpt_y->Scale(1/(double) nEntries); cdifftotpt_y->DrawCopy(); c1->SaveAs((path + "cdifftotpt_y.pdf").c_str());
+    gPad->Modified(); gPad->Update();
+    
+    cdifftotpt->Project3D("z");
+    cdifftotpt_z->GetXaxis()->SetTitle(zaxis);
+    cdifftotpt_z->Scale(1/(double) nEntries); cdifftotpt_z->DrawCopy(); c1->SaveAs((path + "cdifftotpt_z.pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
     
+    //neutral + charged
+    
+    difftotpt->Project3D("yx"); //first vertical, second horizontal
+    difftotpt_yx->GetXaxis()->SetTitle(xaxis); difftotpt_yx->GetYaxis()->SetTitle(yaxis);
+    c1->SetLogz(); difftotpt_yx->DrawCopy("colz"); c1->SaveAs((path + "difftotpt_yx.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    difftotpt->Project3D("zy");
+    difftotpt_zy->GetXaxis()->SetTitle(yaxis); difftotpt_zy->GetYaxis()->SetTitle(zaxis);
+    difftotpt_zy->DrawCopy("colz"); c1->SaveAs((path + "difftotpt_zy.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    difftotpt->Project3D("zx");
+    difftotpt_zx->GetXaxis()->SetTitle(xaxis); difftotpt_zx->GetYaxis()->SetTitle(zaxis);
+    difftotpt_zx->DrawCopy("colz"); c1->SaveAs((path + "difftotpt_zx.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    
+    difftotpt->Project3D("x");
+    difftotpt_x->GetXaxis()->SetTitle(xaxis);
+    difftotpt_x->Scale(1/(double) nEntries); c1->SetLogy(); difftotpt_x->DrawCopy(); c1->SaveAs((path + "difftotpt_x.pdf").c_str());
+    gPad->Modified(); gPad->Update();
+    
+    difftotpt->Project3D("y");
+    difftotpt_y->GetXaxis()->SetTitle(yaxis);
+    difftotpt_y->Scale(1/(double) nEntries); difftotpt_y->DrawCopy(); c1->SaveAs((path + "difftotpt_y.pdf").c_str());
+    gPad->Modified(); gPad->Update();
+    
+    difftotpt->Project3D("z");
+    difftotpt_z->GetXaxis()->SetTitle(zaxis);
+    difftotpt_z->Scale(1/(double) nEntries); difftotpt_z->DrawCopy(); c1->SaveAs((path + "difftotpt_z.pdf").c_str());
+    gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    
+    //gStyle->SetOptStat(1);
     cnumdiff->GetXaxis()->SetTitle("Number of tracks");
-    //numdiff->Scale(1/(double) nEntries);
+    /**/numdiff->Scale(1/(double) nEntries);
     cnumdiff->Scale(1/(double) nEntries); c1->SetLogy();
-    /*
+    //
     TF1 * f = new TF1("f","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 16);
     f->SetParameter(0, 9.44789e-01);
     f->SetParameter(1, 9.99885e-01);
     f->SetParameter(2, 1.71091e+03);
-    numdiff->Fit("f");*/
+    numdiff->Fit("f");//
+    cout << "NEUTRAL + CHARGED" << endl;
     TF1 * fc = new TF1("fc","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 16);
     fc->SetParameter(0, 9.94426e-01);
     fc->SetParameter(1, 9.23768e-01);
     fc->SetParameter(2, 3.95236e+00);
     cnumdiff->Fit("fc");
-    cnumdiff->SetLineColor(1); fc->SetLineColor(2); //f->SetLineColor(1);
-    /*numdiff->DrawCopy(); f->DrawCopy("same");*/ cnumdiff->DrawCopy(/*"same"*/);fc->DrawCopy("same");
-    
-    //TLegend * l = new TLegend(0.15, 0.15, 0.48, 0.3);
-    //l->AddEntry(numdiff, "charged + neutral", "lep");
-    //l->AddEntry(cnumdiff, "charged", "lep");
-    //l->SetBorderSize(0);
-    //l->Draw();
-    
+    cout << "CHARGED" << endl;
+    cnumdiff->SetLineColor(1); fc->SetLineColor(2); f->SetLineColor(1);//
+    /**/numdiff->DrawCopy(); f->DrawCopy("same"); cnumdiff->DrawCopy("same"/**/);fc->DrawCopy("same");
+    //
+    TLegend * l = new TLegend(0.15, 0.15, 0.48, 0.3);
+    l->AddEntry(numdiff, "charged + neutral", "lep");
+    l->AddEntry(cnumdiff, "charged", "lep");
+    l->SetBorderSize(0);
+    l->Draw();
+    //
     c1->SaveAs((path + type + ".pdf").c_str());
-    gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    gPad->Modified(); gPad->Update(); /*c1->SetLogy(0);*/
     
     Double_t chi2 = fc->GetChisquare();
     cout << "Chi squared: " << chi2 << "!" << '\n';
@@ -93,8 +210,9 @@ void DiffClass::Loop()
     //Double_t e1 = f->GetParError(0);
     
     cnumdiff->GetXaxis()->SetTitle("Number of jets");
-    /*cnumdiff->Scale(1/(double) nEntries);*/ c1->SetLogy(); cnumdiff->DrawCopy(); c1->SaveAs((path + "c_" + type + ".pdf").c_str());
+    /*cnumdiff->Scale(1/(double) nEntries);*/ /*c1->SetLogy();*/ cnumdiff->DrawCopy(); c1->SaveAs((path + "c_" + type + ".pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    //gStyle->SetOptStat(0);
     
     delete c1; c1 = NULL;
 }

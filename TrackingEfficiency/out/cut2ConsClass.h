@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Jun  6 16:31:14 2017 by ROOT version 5.34/36
-// from TTree numberAndpTDifferences/number and pT differences
+// Mon Jun 12 12:37:30 2017 by ROOT version 5.34/36
+// from TTree cut2Constituents/cut2 constituents
 // found on file: trackeffic.root
 //////////////////////////////////////////////////////////
 
-#ifndef DiffClass_h
-#define DiffClass_h
+#ifndef cut2ConsClass_h
+#define cut2ConsClass_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -16,37 +16,31 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class DiffClass {
+class cut2ConsClass {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
-   Int_t           num_diff;
-   Int_t           c_num_diff;
-   Double_t        ptdiff;
-   Double_t        c_ptdiff;
-   Double_t        rel_diff;
-   Double_t        c_rel_diff;
-   Int_t           num_before;
-   Int_t           c_num_before;
-   Int_t           num_after;
-   Int_t           c_num_after;
+   Double_t        cut2_cons_px;
+   Double_t        cut2_cons_py;
+   Double_t        cut2_cons_pz;
+   Double_t        cut2_cons_E;
+   Double_t        cut2_cons_phi;
+   Double_t        cut2_cons_eta;
+   Double_t        cut2_cons_Pt;
 
    // List of branches
-   TBranch        *b_num_diff;   //!
-   TBranch        *b_c_num_diff;   //!
-   TBranch        *b_ptdiff;   //!
-   TBranch        *b_c_ptdiff;   //!
-   TBranch        *b_rel_diff;   //!
-   TBranch        *b_c_rel_diff;   //!
-   TBranch        *b_num_before;   //!
-   TBranch        *b_c_num_before;   //!
-   TBranch        *b_num_after;   //!
-   TBranch        *b_c_num_after;   //!
+   TBranch        *b_cut2_cons_px;   //!
+   TBranch        *b_cut2_cons_py;   //!
+   TBranch        *b_cut2_cons_pz;   //!
+   TBranch        *b_cut2_cons_E;   //!
+   TBranch        *b_cut2_cons_phi;   //!
+   TBranch        *b_cut2_cons_eta;   //!
+   TBranch        *b_cut2_cons_Pt;   //!
 
-   DiffClass(TTree *tree=0);
-   virtual ~DiffClass();
+   cut2ConsClass(TTree *tree=0);
+   virtual ~cut2ConsClass();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -58,8 +52,8 @@ public :
 
 #endif
 
-#ifdef DiffClass_cxx
-DiffClass::DiffClass(TTree *tree) : fChain(0) 
+#ifdef cut2ConsClass_cxx
+cut2ConsClass::cut2ConsClass(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -68,25 +62,25 @@ DiffClass::DiffClass(TTree *tree) : fChain(0)
       if (!f || !f->IsOpen()) {
          f = new TFile("trackeffic.root");
       }
-      f->GetObject("numberAndpTDifferences",tree);
+      f->GetObject("cut2Constituents",tree);
 
    }
    Init(tree);
 }
 
-DiffClass::~DiffClass()
+cut2ConsClass::~cut2ConsClass()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t DiffClass::GetEntry(Long64_t entry)
+Int_t cut2ConsClass::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t DiffClass::LoadTree(Long64_t entry)
+Long64_t cut2ConsClass::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -99,7 +93,7 @@ Long64_t DiffClass::LoadTree(Long64_t entry)
    return centry;
 }
 
-void DiffClass::Init(TTree *tree)
+void cut2ConsClass::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -115,20 +109,17 @@ void DiffClass::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("num_diff", &num_diff, &b_num_diff);
-   fChain->SetBranchAddress("c_num_diff", &c_num_diff, &b_c_num_diff);
-   fChain->SetBranchAddress("ptdiff", &ptdiff, &b_ptdiff);
-   fChain->SetBranchAddress("c_ptdiff", &c_ptdiff, &b_c_ptdiff);
-   fChain->SetBranchAddress("rel_diff", &rel_diff, &b_rel_diff);
-   fChain->SetBranchAddress("c_rel_diff", &c_rel_diff, &b_c_rel_diff);
-   fChain->SetBranchAddress("num_before", &num_before, &b_num_before);
-   fChain->SetBranchAddress("c_num_before", &c_num_before, &b_c_num_before);
-   fChain->SetBranchAddress("num_after", &num_after, &b_num_after);
-   fChain->SetBranchAddress("c_num_after", &c_num_after, &b_c_num_after);
+   fChain->SetBranchAddress("cut2_cons_px", &cut2_cons_px, &b_cut2_cons_px);
+   fChain->SetBranchAddress("cut2_cons_py", &cut2_cons_py, &b_cut2_cons_py);
+   fChain->SetBranchAddress("cut2_cons_pz", &cut2_cons_pz, &b_cut2_cons_pz);
+   fChain->SetBranchAddress("cut2_cons_E", &cut2_cons_E, &b_cut2_cons_E);
+   fChain->SetBranchAddress("cut2_cons_phi", &cut2_cons_phi, &b_cut2_cons_phi);
+   fChain->SetBranchAddress("cut2_cons_eta", &cut2_cons_eta, &b_cut2_cons_eta);
+   fChain->SetBranchAddress("cut2_cons_Pt", &cut2_cons_Pt, &b_cut2_cons_Pt);
    Notify();
 }
 
-Bool_t DiffClass::Notify()
+Bool_t cut2ConsClass::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -139,18 +130,18 @@ Bool_t DiffClass::Notify()
    return kTRUE;
 }
 
-void DiffClass::Show(Long64_t entry)
+void cut2ConsClass::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t DiffClass::Cut(Long64_t entry)
+Int_t cut2ConsClass::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef DiffClass_cxx
+#endif // #ifdef cut2ConsClass_cxx

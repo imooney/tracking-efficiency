@@ -80,5 +80,29 @@
     m->Loop();
     delete m; m = NULL;
     
+    //tests
+    gROOT->ProcessLine(".L efficConsClass.C");
+    efficConsClass *n = new efficConsClass;
+    n->Loop();
+    delete n; n = NULL;
+    
+    //tests
+    gROOT->ProcessLine(".L c_efficConsClass.C");
+    c_efficConsClass *o = new c_efficConsClass;
+    o->Loop();
+    delete o; o = NULL;
+    
+    //tests
+    gROOT->ProcessLine(".L cut2ConsClass.C");
+    cut2ConsClass *p = new cut2ConsClass;
+    p->Loop();
+    delete p; p = NULL;
+    
+    //tests
+    gROOT->ProcessLine(".L c_cut2ConsClass.C");
+    c_cut2ConsClass *q = new c_cut2ConsClass;
+    q->Loop();
+    delete q; q = NULL;
+    
     
 }
