@@ -12,6 +12,7 @@
 #include "fastjet/tools/Pruner.hh"
 
 #include "TROOT.h"
+#include "TRandom.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1.h"
@@ -37,8 +38,6 @@ using namespace analysis;
 
 int main() {
     // Generator. Process selection. STAR initialization. Trees.
-    std::mt19937 g = analysis::rands();
-    std::uniform_real_distribution<> dis(0.0, 1.0);
     Pythia pythia;
     analysis::pythia_init(pythia);
     
@@ -50,6 +49,9 @@ int main() {
     
     // Begin event loop. Generate event. Skip if error. List first one.
     
+    int count = 0, c_count = 0;
+    int test_count0 = 0, test_count1 = 0;
+    
     for (unsigned iEvent = 0; iEvent < NumEvents; ++iEvent) {
         test->Clear();
         
@@ -57,7 +59,7 @@ int main() {
         
         // Find all final particles and fill PseudoJet vectors appropriately
         // SHOULD THINK ABOUT WHETHER PASSING IN ENTIRE 'TEST' IS TOO MEMORY INTENSIVE. IF SO, UNCOMMENT AFTER SEMICOLON AND FIX IN THE CLASS.
-        analysis::add_particles(dis, g, pythia.event, test);/*test->uncut_part, test->c_uncut_part, test->cut_part, test->cut2_part,
+        analysis::add_particles(pythia.event, test, test_count0, test_count1);/*test->uncut_part, test->c_uncut_part, test->cut_part, test->cut2_part,
                      test->c_cut_part, test->c_cut2_part, test->effic_part, test->c_effic_part);*/
         
         //WANT TO FIGURE OUT HOW TO WRITE THIS AT SOME POINT (NEED TO GIVE THE CLASS THE CLUSTERSEQUENCE, TOO)
@@ -84,6 +86,23 @@ int main() {
          vector<PseudoJet> c_cut_jets    = sorted_by_pt(c_cut.inclusive_jets());
          vector<PseudoJet> c_cut2_jets   = sorted_by_pt(c_cut2.inclusive_jets());
          vector<PseudoJet> c_effic_jets  = sorted_by_pt(c_effic.inclusive_jets());
+        
+        //TEST
+        /*
+        unsigned counter = 0;
+        for (unsigned i = 0; i < effic_jets.size(); ++ i) {
+            if (jet_cuts(effic_jets[i])) {
+                if (cut2_jets[i].user_index()) {
+                    ++ counter;
+                }
+            }
+        }
+        if (counter == 0) {
+            continue;
+        }
+         */
+        //
+        
         
         //cout << "Clustering with " << jet_def.description() << '\n';
         
@@ -232,6 +251,19 @@ int main() {
                 
                 test->tcut2->Fill();
             }
+            
+            vector<PseudoJet> cut2_cons = cut2_jets[i].constituents();
+            for (unsigned j = 0; j < cut2_cons.size(); ++ j) {
+                test->cut2_cons_px     = cut2_cons[j].px();
+                test->cut2_cons_py     = cut2_cons[j].py();
+                test->cut2_cons_pz     = cut2_cons[j].pz();
+                test->cut2_cons_E      = cut2_cons[j].e();
+                test->cut2_cons_phi    = cut2_cons[j].phi();
+                test->cut2_cons_eta    = cut2_cons[j].eta();
+                test->cut2_cons_Pt     = cut2_cons[j].pt();
+                
+                test->tcut2cons->Fill();
+            }
         }
         
         for (unsigned i = 0; i < c_cut2_jets.size(); ++ i) {
@@ -245,6 +277,19 @@ int main() {
                 test->c_cut2_Pt   = c_cut2_jets[i].pt();
                 
                 test->tccut2->Fill();
+            }
+            
+            vector<PseudoJet> c_cut2_cons = c_cut2_jets[i].constituents();
+            for (unsigned j = 0; j < c_cut2_cons.size(); ++ j) {
+                test->c_cut2_cons_px     = c_cut2_cons[j].px();
+                test->c_cut2_cons_py     = c_cut2_cons[j].py();
+                test->c_cut2_cons_pz     = c_cut2_cons[j].pz();
+                test->c_cut2_cons_E      = c_cut2_cons[j].e();
+                test->c_cut2_cons_phi    = c_cut2_cons[j].phi();
+                test->c_cut2_cons_eta    = c_cut2_cons[j].eta();
+                test->c_cut2_cons_Pt     = c_cut2_cons[j].pt();
+                
+                test->tccut2cons->Fill();
             }
         }
 
@@ -261,6 +306,19 @@ int main() {
                 
                 test->teffic->Fill();
             }
+            
+            vector<PseudoJet> effic_cons = effic_jets[i].constituents();
+            for (unsigned j = 0; j < effic_cons.size(); ++ j) {
+                test->effic_cons_px     = effic_cons[j].px();
+                test->effic_cons_py     = effic_cons[j].py();
+                test->effic_cons_pz     = effic_cons[j].pz();
+                test->effic_cons_E      = effic_cons[j].e();
+                test->effic_cons_phi    = effic_cons[j].phi();
+                test->effic_cons_eta    = effic_cons[j].eta();
+                test->effic_cons_Pt     = effic_cons[j].pt();
+                
+                test->tefficcons->Fill();
+            }
         }
         
         for (unsigned i = 0; i < c_effic_jets.size(); ++ i) {
@@ -275,20 +333,39 @@ int main() {
                 
                 test->tceffic->Fill();
             }
+            
+            vector<PseudoJet> c_effic_cons = c_effic_jets[i].constituents();
+            for (unsigned j = 0; j < c_effic_cons.size(); ++ j) {
+                test->c_effic_cons_px     = c_effic_cons[j].px();
+                test->c_effic_cons_py     = c_effic_cons[j].py();
+                test->c_effic_cons_pz     = c_effic_cons[j].pz();
+                test->c_effic_cons_E      = c_effic_cons[j].e();
+                test->c_effic_cons_phi    = c_effic_cons[j].phi();
+                test->c_effic_cons_eta    = c_effic_cons[j].eta();
+                test->c_effic_cons_Pt     = c_effic_cons[j].pt();
+                
+                test->tcefficcons->Fill();
+            }
         }
 
         //Checking that pt spectrum without 2 highest-pt jets looks right
         analysis::without_lead2_jets(effic_jets, test->without_leadsublead, test->ttests);
         
-        //Checks pt difference between leading jet with efficiency correction and
+        //Checks pt & num difference between leading jet with efficiency correction and
         //geometrically closest jet without efficiency correction.
-        analysis::geometric_pt_diff(effic_jets, cut2_jets, test->ptdiff, test->num_diff);
-        analysis::geometric_pt_diff(c_effic_jets, c_cut2_jets, test->c_ptdiff, test->c_num_diff);
+        analysis::geometric_diff(effic_jets, cut2_jets, test->ptdiff, test->num_diff, test->num_before, test->num_after, test->rel_diff, count);
+        analysis::geometric_diff(c_effic_jets, c_cut2_jets, test->c_ptdiff, test->c_num_diff, test->c_num_before, test->c_num_after, test->c_rel_diff, c_count);
 
         test->tdiffs->Fill();
         
     // End of event loop
     }
+    
+    std::cout << "Failed " << (count/(double) NumEvents)*100 << "% of the time\n";
+    std::cout << "Failed " << (c_count/(double) NumEvents)*100 << "% of the time (charged)\n";
+    
+    std::cout << "effic = 0: " << test_count0 << " times\n";
+    std::cout << "effic = 1: " << test_count1 << " times\n";
     
     pythia.stat();
     

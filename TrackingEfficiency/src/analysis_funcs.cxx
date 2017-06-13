@@ -4,30 +4,17 @@
 #include "analysis_funcs.h"
 
 namespace analysis {
-    //initializes the random seed
-    std::mt19937 rands() {
-        //seeding pseudorandom number generator
-        auto begin = std::chrono::high_resolution_clock::now();
-        
-        //generating the distribution
-        std::random_device rd;
-        std::mt19937 g(rd());
-        auto end = std::chrono::high_resolution_clock::now();
-        g.seed(std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count());
-        
-        return g;
-    }
-    
     //Initializes Pythia
     void pythia_init(Pythia8::Pythia & pythia) {
         //Setting parameters for Pythia
         
         pythia.readString("Beams:eCM            = 200.");
         pythia.readString("HardQCD:all          = on");
-        pythia.readString("PhaseSpace:pTHatMin  = 25.");
-        pythia.readString("PhaseSpace:pTHatMax  = 35.");
+        pythia.readString("PhaseSpace:pTHatMin  = 20.");
+        pythia.readString("PhaseSpace:pTHatMax  = 30.");
         
         //turn off decays
+        /*
         pythia.readString("111:mayDecay     = off");    //pi0
         pythia.readString("211:mayDecay     = off");    //pi+
         pythia.readString("-211:mayDecay    = off");    //pi-
@@ -42,7 +29,7 @@ namespace analysis {
         pythia.readString("3312:mayDecay    = off");    //Xi-
         pythia.readString("3322:mayDecay    = off");    //Xi0
         pythia.readString("3334:mayDecay    = off");    //Omega-
-        
+        */
         pythia.init();
         
         return;
@@ -73,7 +60,7 @@ namespace analysis {
         return false;
     }
     
-    void add_particles(std::uniform_real_distribution<> dis, std::mt19937 g, Pythia8::Event event, containers * container) {
+    void add_particles(Pythia8::Event event, containers * container, int & test_count0, int & test_count1) {
         for (unsigned i = 0; i < event.size(); ++i) {
             //only select final state particles within particle-level eta cut
             if (event[i].isFinal() && event[i].isVisible()) {
@@ -88,14 +75,16 @@ namespace analysis {
                     container->c_uncut_part.push_back(current);
                 }
                 if (constituent_cuts(event[i])) {
-                    double effic_num = dis(g);
+                    double effic_num = gRandom->Uniform(0.0, 1.0);
+                    if (effic_num < 0.1) {++ test_count0;}
+                    if (effic_num > 0.9) {++ test_count1;}
                     if (efficiency_cut(effic_num, event[i])) {
                         //fill the original vector, skip filling the tracking efficiency applied vector
                         container->cut_part.push_back(current);
                         container->cut2_part.push_back(current);
                         container->c_cut_part.push_back(current);
                         container->c_cut2_part.push_back(current);
-                        continue;
+                        //continue; // why was this here?
                     }
                     else {
                         //fill both
@@ -127,28 +116,58 @@ namespace analysis {
         }
     }
     
-    //Pt difference between leading jet after efficiency correction and geometrically
-    //closest (eta-phi) jet before correction
-    void geometric_pt_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff, int & num_diff) {
+    //Pt & num difference between leading jet before efficiency correction and geometrically
+    //closest (eta-phi) jet after correction
+    void geometric_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff, int & num_diff, int & num_before, int & num_after, double & rel_diff, int & count) {
         double mindist  =   99999;
         double pt_diff  =  -99999;
         int numdiff     =  -99999;
-        if (effic_jets.size() != 0 ) {
-            for (unsigned i = 0; i < cut2_jets.size(); ++ i) {
-                double dist = effic_jets[0].delta_R(cut2_jets[i]);
-                if (dist < mindist) {
-                    mindist = dist;
-                    pt_diff = effic_jets[0].pt() - cut2_jets[i].pt();
-                    //std::cout << effic_jets[0].constituents().size() << " " << cut2_jets[i].constituents().size() << std::endl;
-                    numdiff = cut2_jets[i].constituents().size() - effic_jets[0].constituents().size();
-                    //std::cout << numdiff << " " << effic_jets[0].constituents().size() - cut2_jets[i].constituents().size() << std::endl;
+        int num_b       =  -99999;
+        double maxR     =   R;
+        int ever        =   0;
+        int whichone    =   0;
+        
+        num_before  = -99;
+        num_after   = -99;
+        rel_diff    = -99;
+        num_diff    = -99;
+
+        
+        if (cut2_jets.size() != 0 ) {
+            if (jet_cuts(cut2_jets[0])) {
+                ever = 1;
+                num_b   = cut2_jets[0].constituents().size();
+                for (unsigned i = 0; i < effic_jets.size(); ++ i) {
+                    if (jet_cuts(effic_jets[i])) {
+                        double dist = cut2_jets[0].delta_R(effic_jets[i]);
+                        if (dist < mindist) {
+                            mindist = dist;
+                            pt_diff = effic_jets[i].pt() - cut2_jets[0].pt();
+                            numdiff = cut2_jets[0].constituents().size() - effic_jets[i].constituents().size();
+                            whichone = i;
+                        }
+                    }
                 }
             }
         }
-        if (mindist != 99999) {
-            ptdiff = pt_diff;
-            //std::cout << "FINAL: " <<  numdiff << std::endl;
-            num_diff = numdiff;
+        
+        if (/*mindist != 99999*/ mindist < 0.1){//maxR) {
+            ptdiff      = pt_diff;
+            num_diff    = numdiff;
+            num_before  = num_b;
+            num_after   = num_before - num_diff;
+            rel_diff    = num_diff/ (double) num_before;
+        }
+        else {
+            //COME BACK TO THIS AND THINK ABOUT IT:
+            if (ever == 1/*mindist != 99999*/) {
+                ++count;
+                rel_diff = 1;
+                num_before = num_b;
+                
+                //pt_diff = ?;
+                //std::cout << rel_diff << '\n';
+            }
         }
     }
     
@@ -171,6 +190,10 @@ namespace analysis {
             
         tuncutcons    = new TTree("uncutConstituents","uncut constituents");
         tcuncutcons   = new TTree("chargedUncutConstituents","charged uncut constituents");
+        tcut2cons    = new TTree("cut2Constituents","cut2 constituents");
+        tccut2cons   = new TTree("chargedCut2Constituents","charged cut2 constituents");
+        tefficcons    = new TTree("efficConstituents","effic constituents");
+        tcefficcons   = new TTree("chargedEfficConstituents","charged effic constituents");
         
         //book space for the vectors of particles
         uncut_part.reserve(50); c_uncut_part.reserve(50);   cut_part.reserve(50);
@@ -208,7 +231,27 @@ namespace analysis {
         tcuncutcons->Branch("c_uncut_cons_pz", &c_uncut_cons_pz);   tcuncutcons->Branch("c_uncut_cons_E", &c_uncut_cons_E);
         tcuncutcons->Branch("c_uncut_cons_phi", &c_uncut_cons_phi); tcuncutcons->Branch("c_uncut_cons_eta", &c_uncut_cons_eta);
         tcuncutcons->Branch("c_uncut_cons_Pt", &c_uncut_cons_Pt);
-            
+        
+        tcut2cons->Branch("cut2_cons_px", &cut2_cons_px);           tcut2cons->Branch("cut2_cons_py", &cut2_cons_py);
+        tcut2cons->Branch("cut2_cons_pz", &cut2_cons_pz);           tcut2cons->Branch("cut2_cons_E", &cut2_cons_E);
+        tcut2cons->Branch("cut2_cons_phi", &cut2_cons_phi);         tcut2cons->Branch("cut2_cons_eta", &cut2_cons_eta);
+        tcut2cons->Branch("cut2_cons_Pt", &cut2_cons_Pt);
+        
+        tccut2cons->Branch("c_cut2_cons_px", &c_cut2_cons_px);      tccut2cons->Branch("c_cut2_cons_py", &c_cut2_cons_py);
+        tccut2cons->Branch("c_cut2_cons_pz", &c_cut2_cons_pz);      tccut2cons->Branch("c_cut2_cons_E", &c_cut2_cons_E);
+        tccut2cons->Branch("c_cut2_cons_phi", &c_cut2_cons_phi);    tccut2cons->Branch("c_cut2_cons_eta", &c_cut2_cons_eta);
+        tccut2cons->Branch("c_cut2_cons_Pt", &c_cut2_cons_Pt);
+        
+        tefficcons->Branch("effic_cons_px", &effic_cons_px);        tefficcons->Branch("effic_cons_py", &effic_cons_py);
+        tefficcons->Branch("effic_cons_pz", &effic_cons_pz);        tefficcons->Branch("effic_cons_E", &effic_cons_E);
+        tefficcons->Branch("effic_cons_phi", &effic_cons_phi);      tefficcons->Branch("effic_cons_eta", &effic_cons_eta);
+        tefficcons->Branch("effic_cons_Pt", &effic_cons_Pt);
+        
+        tcefficcons->Branch("c_effic_cons_px", &c_effic_cons_px);   tcefficcons->Branch("c_effic_cons_py", &c_effic_cons_py);
+        tcefficcons->Branch("c_effic_cons_pz", &c_effic_cons_pz);   tcefficcons->Branch("c_effic_cons_E", &c_effic_cons_E);
+        tcefficcons->Branch("c_effic_cons_phi", &c_effic_cons_phi); tcefficcons->Branch("c_effic_cons_eta", &c_effic_cons_eta);
+        tcefficcons->Branch("c_effic_cons_Pt", &c_effic_cons_Pt);
+        
         tcut->Branch("cut_px", &cut_px);                            tcut->Branch("cut_py", &cut_py);
         tcut->Branch("cut_pz", &cut_pz);                            tcut->Branch("cut_E", &cut_E);
         tcut->Branch("cut_phi", &cut_phi);                          tcut->Branch("cut_eta", &cut_eta);
@@ -241,6 +284,9 @@ namespace analysis {
             
         tdiffs->Branch("num_diff", &num_diff);                      tdiffs->Branch("c_num_diff", &c_num_diff);
         tdiffs->Branch("ptdiff", &ptdiff);                          tdiffs->Branch("c_ptdiff", &c_ptdiff);
+        tdiffs->Branch("rel_diff", &rel_diff);                      tdiffs->Branch("c_rel_diff", &c_rel_diff);
+        tdiffs->Branch("num_before", &num_before);                  tdiffs->Branch("c_num_before", &c_num_before);
+        tdiffs->Branch("num_after", &num_after);                    tdiffs->Branch("c_num_after", &c_num_after);
             
         tlead->Branch("uncut_leadPt", &uncut_leadPt);               tlead->Branch("c_uncut_leadPt", &c_uncut_leadPt);
         tlead->Branch("cut_leadPt", &cut_leadPt);                   tlead->Branch("c_cut_leadPt", &c_cut_leadPt);
@@ -266,5 +312,7 @@ namespace analysis {
         tlead->Write();   tdiffs->Write();  ttests->Write();
         
         tuncutcons->Write(); tcuncutcons->Write();
+        tcut2cons->Write();  tccut2cons->Write();
+        tefficcons->Write(); tcefficcons->Write();
     }
 }
