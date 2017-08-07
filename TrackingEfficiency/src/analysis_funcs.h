@@ -35,17 +35,17 @@ namespace analysis {
     
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PARAMETERS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-        const int NumEvents     = 1e4;
+    const int NumEvents     = 1e4;
     //CUTS:
-        //Particle level:
-        const double eta_cut    = 1.0;//9999;//1.0;
-        const double pt_cut     = 0.2;//0;//0.2;
-        //Jet level:
-        const double R          = 0.4;//1000;
-        const double jet_eta    = 1-R;//9999 - R;
+    //Particle level:
+    const double eta_cut    = 1.0;
+    const double pt_cut     = 0.2;
+    //Jet level:
+    const double R          = 0.4;
+    const double jet_eta    = 1-R;
     
     //EFFICIENCY:
-        const double efficiency = 0.8;
+    const double efficiency = 0.8;
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     //initializes Pythia
@@ -57,13 +57,9 @@ namespace analysis {
     //tracking efficiency selection
     bool efficiency_cut(const double effic_num, const Pythia8::Particle particle);
     //fills particle vectors after appropriate cuts are passed
-    unsigned add_particles(Pythia8::Event event, containers * container, unsigned &, TH1 *);
-    //possibly implementing later: clusters the particles into jets
-    //void cluster(containers *container, const fastjet::JetDefinition jet_def);
-    //a test to see that pT spectrum is steeply falling if 1st and 2nd leading jets are removed
-    void without_lead2_jets(const std::vector<fastjet::PseudoJet> effic_jets, double & without_leadsublead, TTree* ttests);
+    void add_particles(Pythia8::Event event, containers * container, int);
     //examines the pT & num difference between efficiency-corrected, and non-efficiency-corrected 'leading' jets
-    void geometric_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff, int & num_diff, int & num_before, int & num_after, double & rel_diff, int & count);
+    void geometric_diff(const std::vector<fastjet::PseudoJet> effic_jets, const std::vector<fastjet::PseudoJet> cut2_jets, double & ptdiff, int & num_diff, int & num_before, int & num_after, double & rel_diff);
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONTAINER CLASS~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     
@@ -72,7 +68,7 @@ namespace analysis {
         //MOVE THINGS HERE LATER AND WRITE GETTERS? SEEMS LIKE A PAIN
     public:
         //trees
-        TTree *tuncut, *tcuncut, *tcut, *tccut, *tcut2, *tccut2, *teffic, *tceffic, *tlead, *tdiffs, *ttests, *tuncutcons, *tcuncutcons, *tcut2cons, *tccut2cons, *tefficcons, *tcefficcons;
+        TTree *tuncut, *tcuncut, *tcut, *tccut, *tcut2, *tccut2, *teffic, *tceffic, *tlead, *tdiffs, *tuncutcons, *tcuncutcons, *tcut2cons, *tccut2cons, *tefficcons, *tcefficcons;
         
         //branches
         double uncut_px, uncut_py, uncut_pz, uncut_E, uncut_phi, uncut_eta, uncut_leadPt, uncut_Pt;
@@ -88,25 +84,15 @@ namespace analysis {
         double cut2_px, cut2_py, cut2_pz, cut2_E, cut2_phi, cut2_eta, cut2_leadPt, cut2_Pt;
         double c_cut2_px, c_cut2_py, c_cut2_pz, c_cut2_E, c_cut2_phi, c_cut2_eta, c_cut2_leadPt, c_cut2_Pt;
         double effic_px, effic_py, effic_pz, effic_E, effic_phi, effic_eta, effic_leadPt, effic_Pt;
-        double without_leadsublead;
         double c_effic_px, c_effic_py, c_effic_pz, c_effic_E, c_effic_phi, c_effic_eta, c_effic_leadPt, c_effic_Pt;
         double ptdiff, c_ptdiff, rel_diff, c_rel_diff;
         int num_diff, c_num_diff, num_before, num_after, c_num_before, c_num_after;
         
         //particles
         std::vector<fastjet::PseudoJet> uncut_part, c_uncut_part, cut_part, cut2_part, c_cut_part, c_cut2_part, effic_part, c_effic_part;
-        //LATER EXTEND TO INCLUDE JET VECTORS IN ADDITION TO THE ABOVE PARTICLE VECTORS? TRICKY THOUGH
-        
-        //jets
-        //std::vector<fastjet::PseudoJet> uncut_jets, c_uncut_jets, cut_jets, cut2_jets, c_cut_jets, c_cut2_jets, effic_jets, c_effic_jets;
-        
-        //cluster sequences
-        //fastjet::ClusterSequence uncut(), cut(), cut2(), effic(), c_uncut(), c_cut(), c_cut2(), c_effic();
-        
         
         containers();               //constructor (initializes the trees, reserves space for vectors)
         virtual ~containers() {}    //destructor (shouldn't need to implement?)
-        
         
         //getters & setters
         
