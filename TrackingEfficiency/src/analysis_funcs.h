@@ -38,11 +38,11 @@ namespace analysis {
         const int NumEvents     = 1e4;
     //CUTS:
         //Particle level:
-        const double eta_cut    = 1.0;
-        const double pt_cut     = 0.2;
+        const double eta_cut    = 1.0;//9999;//1.0;
+        const double pt_cut     = 0.2;//0;//0.2;
         //Jet level:
-        const double R          = 0.4;
-        const double jet_eta    = 1 - R;
+        const double R          = 0.4;//1000;
+        const double jet_eta    = 1-R;//9999 - R;
     
     //EFFICIENCY:
         const double efficiency = 0.8;
@@ -57,7 +57,7 @@ namespace analysis {
     //tracking efficiency selection
     bool efficiency_cut(const double effic_num, const Pythia8::Particle particle);
     //fills particle vectors after appropriate cuts are passed
-    void add_particles(Pythia8::Event event, containers * container, int &, int &);
+    unsigned add_particles(Pythia8::Event event, containers * container, unsigned &, TH1 *);
     //possibly implementing later: clusters the particles into jets
     //void cluster(containers *container, const fastjet::JetDefinition jet_def);
     //a test to see that pT spectrum is steeply falling if 1st and 2nd leading jets are removed
