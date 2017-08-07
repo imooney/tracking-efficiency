@@ -40,10 +40,11 @@ void DiffClass::Loop()
     
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
     
-    gStyle->SetOptStat(0);
+    //gStyle->SetOptStat(0);
+    gStyle->SetOptFit(1111);
     
-    TH1 * numdiff   = new TH1D((type).c_str(), "Number difference before - after efficiency", 100, 0, 8);
-    TH1 * cnumdiff  = new TH1D(("c_" + type).c_str(), "Number difference before - after efficiency (charged)", 100, 0, 8);
+    TH1 * numdiff   = new TH1D((type).c_str(), "Number difference before - after efficiency", 100, 0, 30);
+    TH1 * cnumdiff  = new TH1D(("c_" + type).c_str(), "Number difference before - after efficiency (charged)", 10, 0, 10);
     TH1 * reldiff   = new TH1D("rel_diff", "ratio of track difference to number of tracks",100, -0.1, 1.1);
     TH1 * creldiff  = new TH1D("crel_diff", "ratio of track difference to number of tracks (charged)",100, -0.1, 1.1);
     
@@ -69,17 +70,18 @@ void DiffClass::Loop()
         cdifftotpt->Fill(c_num_diff, c_num_before, c_ptdiff);
         difftotpt->Fill(num_diff, num_before, ptdiff);
     }
+    /*
     TH1D * reldiffprofX = reldiff2D->ProfileX("reldiffprofX", 0, 5);
     TH1D * creldiffprofX = creldiff2D->ProfileX("creldiffprofX", 0, 5);
     
     TH1D * reldiffX = reldiff2D->ProjectionX("reldiffX", 8, 16);
     TH1D * creldiffX = creldiff2D->ProjectionX("creldiffX", 8, 16);
-    
+    */
 
     
     
-    Int_t nEntries = numdiff->GetEntries();
-    
+    Int_t nEntries = cnumdiff->GetEntries();
+    /*
     const char *xaxis = "Number difference";
     const char *yaxis = "Total number";
     const char *zaxis = "p_{T} difference [GeV/c]";
@@ -107,13 +109,16 @@ void DiffClass::Loop()
     creldiffX->GetXaxis()->SetTitle("Relative difference");
     creldiffX->DrawCopy(); c1->SaveAs((path + "c_reldiffX.pdf").c_str()); gPad->Modified(); gPad->Update();
     
-    //c1->SetLogy();
+    reldiff->Scale(1/(double) nEntries);
+    creldiff->Scale(1/(double) nEntries);
     
     reldiff->GetXaxis()->SetTitle("Number difference/Total number");
     reldiff->DrawCopy(); c1->SaveAs((path + "reldiff.pdf").c_str()); gPad->Modified(); gPad->Update();
     
     creldiff->GetXaxis()->SetTitle("Number difference/Total number");
-    creldiff->DrawCopy(); c1->SaveAs((path + "creldiff.pdf").c_str()); gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    creldiff->DrawCopy(); c1->SaveAs((path + "creldiff.pdf").c_str()); gPad->Modified(); gPad->Update();
+    
+    c1->SetLogy(0);
     
     //charged
     
@@ -174,45 +179,62 @@ void DiffClass::Loop()
     difftotpt_z->GetXaxis()->SetTitle(zaxis);
     difftotpt_z->Scale(1/(double) nEntries); difftotpt_z->DrawCopy(); c1->SaveAs((path + "difftotpt_z.pdf").c_str());
     gPad->Modified(); gPad->Update(); c1->SetLogy(0);
-    
+    */
     //gStyle->SetOptStat(1);
     cnumdiff->GetXaxis()->SetTitle("Number of tracks");
     /**/numdiff->Scale(1/(double) nEntries);
     cnumdiff->Scale(1/(double) nEntries); c1->SetLogy();
+    /*
+    TF1 * f = new TF1("f","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 10);
+    //TF1 * f = new TF1("f","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 10);
+    f->SetParameter(0, 0.1);
+    f->SetParameter(1, 0.6);
+    f->SetParameter(2, 20);
+    numdiff->Fit("f");*/
+    //cout << "NEUTRAL + CHARGED" << endl;
+    TF1 * fc = new TF1("fc","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 10);
+    TF1 * fcbin = new TF1("fcbin","[0]*ROOT::Math::binomial_pdf(x,[1],[2])",0, 10);
+    TF1 * fcpois = new TF1("fcpois","[0]*ROOT::Math::poisson_pdf(x,[1])", 0, 10);
+    
+    fc->SetParameter(0, 1);
+    fc->SetParameter(1, 0.8);
+    fc->SetParameter(2, 3.717);
+    cnumdiff->Fit("fc", "MEI");
+    
+    fcbin->SetParameter(0, 1);
+    fcbin->SetParameter(1, 0.2);
+    fcbin->SetParameter(2, 5.043);
+    cnumdiff->Fit("fcbin", "ME");
+    
+    fcpois->SetParameter(0, 1);
+    fcpois->SetParameter(1, 1.826);
+    cnumdiff->Fit("fcpois", "MEI");
+    
+    //cout << "CHARGED" << endl;
+    cnumdiff->SetLineColor(1); fc->SetLineColor(2); fcbin->SetLineColor(1); fcpois->SetLineColor(3);/*f->SetLineColor(1);*/
+    /*numdiff->DrawCopy(); f->DrawCopy("same");*/ cnumdiff->DrawCopy();fc->DrawCopy("same"); fcbin->DrawCopy("same"); fcpois->DrawCopy("same");
     //
-    TF1 * f = new TF1("f","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 16);
-    f->SetParameter(0, 9.44789e-01);
-    f->SetParameter(1, 9.99885e-01);
-    f->SetParameter(2, 1.71091e+03);
-    numdiff->Fit("f");//
-    cout << "NEUTRAL + CHARGED" << endl;
-    TF1 * fc = new TF1("fc","[0]*ROOT::Math::negative_binomial_pdf(x,[1],[2])",0, 16);
-    fc->SetParameter(0, 9.94426e-01);
-    fc->SetParameter(1, 9.23768e-01);
-    fc->SetParameter(2, 3.95236e+00);
-    cnumdiff->Fit("fc");
-    cout << "CHARGED" << endl;
-    cnumdiff->SetLineColor(1); fc->SetLineColor(2); f->SetLineColor(1);//
-    /**/numdiff->DrawCopy(); f->DrawCopy("same"); cnumdiff->DrawCopy("same"/**/);fc->DrawCopy("same");
-    //
-    TLegend * l = new TLegend(0.15, 0.15, 0.48, 0.3);
-    l->AddEntry(numdiff, "charged + neutral", "lep");
-    l->AddEntry(cnumdiff, "charged", "lep");
+    TLegend * l = new TLegend(0.5, 0.75, 0.75, 0.875);
+    //l->AddEntry(numdiff, "charged + neutral", "lep");
+    l->AddEntry(cnumdiff, "number difference", "lep");
+    l->AddEntry(fc, "nbd", "l");
+    l->AddEntry(fcbin, "binomial", "l");
+    l->AddEntry(fcpois, "poisson", "l");
     l->SetBorderSize(0);
     l->Draw();
     //
-    c1->SaveAs((path + type + ".pdf").c_str());
+    //c1->SaveAs((path /*+ type*/ + "comparefits.pdf").c_str());
     gPad->Modified(); gPad->Update(); /*c1->SetLogy(0);*/
     
-    Double_t chi2 = fc->GetChisquare();
-    cout << "Chi squared: " << chi2 << "!" << '\n';
+    //Double_t chi2 = fc->GetChisquare();
+    //cout << "Chi squared: " << chi2 << "!" << '\n';
     //Double_t p1 = f->GetParameter(0);
     //Double_t e1 = f->GetParError(0);
     
-    cnumdiff->GetXaxis()->SetTitle("Number of jets");
-    /*cnumdiff->Scale(1/(double) nEntries);*/ /*c1->SetLogy();*/ cnumdiff->DrawCopy(); c1->SaveAs((path + "c_" + type + ".pdf").c_str());
-    gPad->Modified(); gPad->Update(); c1->SetLogy(0);
+    //cnumdiff->GetXaxis()->SetTitle("Number of jets");
+    /*cnumdiff->Scale(1/(double) nEntries);*/ /*c1->SetLogy();*/ //cnumdiff->DrawCopy(); c1->SaveAs((path + "c_" + type + ".pdf").c_str());
+    //gPad->Modified(); gPad->Update(); c1->SetLogy(0);
     //gStyle->SetOptStat(0);
     
-    delete c1; c1 = NULL;
+    //delete c1; c1 = NULL;
 }
