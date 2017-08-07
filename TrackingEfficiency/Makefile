@@ -80,5 +80,9 @@ clean :
 	@echo
 	@echo CLEANING
 	rm -vf $(ODIR)/*.o
+	#rm -vf out/*.root
 	rm -vf $(BDIR)/*
+	rm -vf p6histos/*
+	
+	
 	#rm -vf lib/*

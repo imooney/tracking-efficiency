@@ -20,12 +20,14 @@ const string histos = "compareCons/";
 //const string corntree   = "charged";
 const string tree1      = "chargedEfficConstituents";
 const string tree2      = "chargedCut2Constituents";
+const string tree3      = "chargedCut2";
 
 //const string corn       = "c_";
 const string branch1    = "c_effic_cons_Pt";
 const string branch2    = "c_cut2_cons_Pt";
 
 void compareConstituents () {
+    //gStyle->SetOptStat(1);
     
     TH1::SetDefaultSumw2();
     TH2::SetDefaultSumw2();
@@ -47,10 +49,14 @@ void compareConstituents () {
     
     TTree* efficTree    = (TTree*) myfile->Get(tree1.c_str());
     TTree* cut2Tree     = (TTree*) myfile->Get(tree2.c_str());
+    TTree* normTree     = (TTree*) myfile->Get(tree3.c_str());
+    
+    //GET ENTRIES IN NORMTREE LATER
     
     Double_t effic_Pt, cut2_Pt;
     efficTree->SetBranchAddress((branch1).c_str(), &effic_Pt);
     cut2Tree->SetBranchAddress((branch2).c_str(), &cut2_Pt);
+    
     
     for(unsigned i = 0; i < efficTree->GetEntries(); ++ i) {
         efficTree->GetEntry(i);
@@ -62,8 +68,8 @@ void compareConstituents () {
     }
     
     //normalization
-    Int_t nEntriesEffic = effic_pt->GetEntries();
     Int_t nEntriesCut2 = cut2_pt->GetEntries();
+    Int_t nEntriesEffic = nEntriesCut2;//effic_pt->GetEntries();
     effic_pt->Scale(1/(double) nEntriesEffic);
     cut2_pt->Scale(1/(double) nEntriesCut2);
     
